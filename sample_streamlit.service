@@ -1,0 +1,17 @@
+[Unit]
+Description={{SERVICE_DESCRIPTION}}
+After=network.target
+
+[Service]
+User={{USERNAME}}
+WorkingDirectory={{WORKING_DIRECTORY}}
+ExecStart={{EXECUTABLE_PATH}} run {{CODE_FILE_LOCATION}} --server.port={{STREAMLIT_PORT}} --server.headless=true --log.level={{LOG_LEVEL}}
+Restart={{RESTART_POLICY}}
+RestartSec={{RESTART_DELAY}}
+EnvironmentFile=/path/to/your/envfile  # Load from .env file
+Environment="PATH={{ENVIRONMENT_PATH}}:/usr/bin:/bin"
+StandardOutput=append:/var/log/{{USERNAME}}/streamlit_output.log
+StandardError=append:/var/log/{{USERNAME}}/streamlit_error.log
+
+[Install]
+WantedBy=multi-user.target

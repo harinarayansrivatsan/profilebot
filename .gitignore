@@ -1,0 +1,13 @@
+# Ignore developer's personal files
+credentials.env
+config.env
+chathistory.log
+bio.pdf
+streamlit.service
+
+# Ignore Python bytecode files generated during execution
+__pycache__/
+*.pyc
+
+# Ignore system-specific files like VSCode workspace settings and macOS-specific files
+.vscode/
