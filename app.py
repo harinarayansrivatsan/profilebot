@@ -8,7 +8,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.prompts.prompt import PromptTemplate
 import logging
 import os
-from prompts import system_prompt, special_instructions
+from prompts import system_prompt
 import streamlit as st
 
 # Load environment variables
@@ -56,12 +56,12 @@ def config_llm():
     )
 
     my_modelkwargs = { 
-        "max_tokens_to_sample": int(os.getenv('MODEL_MAX_TOKENS_TO_SAMPLE', 100)), 
-        "temperature": float(os.getenv('MODEL_TEMPERATURE', 0.1)), 
+        "max_gen_len": int(os.getenv('MODEL_GEN_LEN', 100)), 
+        "temperature": float(os.getenv('MODEL_TEMPERATURE', 0.1)),
         "top_p": float(os.getenv('MODEL_TOP_P', 1))
     }
 
-    my_modelid = os.getenv('MODEL_ID','anthropic.claude-instant-v1')
+    my_modelid = os.getenv('MODEL_ID','meta.llama3-8b-instruct-v1:0')
 
     llm = BedrockLLM(
         model_id=my_modelid,
@@ -119,25 +119,23 @@ for msg in msgs.messages:
 
 # Create prompt template   
 my_prompttemplate = """
-
-Human:
+<|begin_of_text|>
+<|start_header_id|>system<|end_header_id|>
 {system_prompt}
 
-<information>
 {retrieved_chunks}
-</information>
+<|eot_id|>
 
-{special_instructions}
-
-User:
+<|start_header_id|>user<|end_header_id|>
 {user_prompt}
+<|eot_id|>
 
-Assistant:
+<|start_header_id|>assistant<|end_header_id|>
 """
 
 # Set up prompt template to send to model
 prompt_template = PromptTemplate(
-    input_variables=['system_prompt', 'retrieved_chunks', 'user_prompt', 'special_instructions'],
+    input_variables=['system_prompt', 'retrieved_chunks', 'user_prompt'],
     template=my_prompttemplate
 )
 
@@ -154,7 +152,7 @@ if user_input := st.chat_input():
     retrieved_chunks = ""
     for doc in docs:
         retrieved_chunks += doc[0].page_content + '\n'
-    model_response = question_chain.invoke({"system_prompt":system_prompt,"user_prompt": user_input, "retrieved_chunks":retrieved_chunks, "special_instructions":special_instructions})
+    model_response = question_chain.invoke({"system_prompt":system_prompt,"user_prompt": user_input, "retrieved_chunks":retrieved_chunks})
 
     logging.info("Model Response: %s", model_response)
 
